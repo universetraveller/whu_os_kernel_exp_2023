@@ -795,7 +795,7 @@ static inline void __free_one_page(struct page *page,
 	if(test_p){
 		printk(KERN_DEBUG"page_alloc.c, 795: __free_one_page -> %x is merged as buddy", (int*)test_p);
 	}else{
-		printk("page_alloc.c, 795: __free_one_page -> <unk> is merged as buggy");
+		printk(KERN_DEBUG"page_alloc.c, 795: __free_one_page -> <unk> is merged as buggy");
 	}
 		
 	struct capture_control *capc = task_capc(zone);
@@ -1286,12 +1286,12 @@ static void free_one_page(struct zone *zone,
 				unsigned int order,
 				int migratetype, fpi_t fpi_flags)
 {
-	printk("Trying free one page");
+	printk(KERN_DEBUG"Trying free one page");
 	void* test_p = page_address(page);
 	if(test_p){
-		printk("page_alloc.c, 1290: free_one_page -> %x", (int*)test_p);
+		printk(KERN_DEBUG"page_alloc.c, 1290: free_one_page -> %x", (int*)test_p);
 	}else{
-		printk("page_alloc.c, 1290: free_one_page -> <unk>", (int*)test_p);
+		printk(KERN_DEBUG"page_alloc.c, 1290: free_one_page -> <unk>", (int*)test_p);
 	}
 	unsigned long flags;
 
@@ -1309,9 +1309,9 @@ static void __free_pages_ok(struct page *page, unsigned int order,
 {
 	void* test_p = page_address(page);
 	if(test_p){
-		printk("page_alloc.c, 1305: __free_pages_ok -> %x", (int*)test_p);
+		printk(KERN_DEBUG"page_alloc.c, 1305: __free_pages_ok -> %x", (int*)test_p);
 	}else{
-		printk("page_alloc.c, 1305: __free_pages_ok -> <unk>", (int*)test_p);
+		printk(KERN_DEBUG"page_alloc.c, 1305: __free_pages_ok -> <unk>", (int*)test_p);
 	}
 	unsigned long flags;
 	int migratetype;

@@ -1000,7 +1000,7 @@ static unsigned long shrink_slab_memcg(gfp_t gfp_mask, int nid,
 	}
 unlock:
 	up_read(&shrinker_rwsem);
-	printk("vmscan.c, 1003: total %d slab freed", freed);
+	printk(KERN_DEBUG"vmscan.c, 1003: total %d slab freed", freed);
 	return freed;
 }
 #else /* CONFIG_MEMCG */
@@ -1077,7 +1077,7 @@ static unsigned long shrink_slab(gfp_t gfp_mask, int nid,
 	up_read(&shrinker_rwsem);
 out:
 	cond_resched();
-	printk("vmscan.c, 1079: total %d slab freed", freed);
+	printk(KERN_DEBUG"vmscan.c, 1079: total %d slab freed", freed);
 	return freed;
 }
 
@@ -1714,7 +1714,7 @@ static unsigned int shrink_folio_list(struct list_head *folio_list,
 		struct pglist_data *pgdat, struct scan_control *sc,
 		struct reclaim_stat *stat, bool ignore_references)
 {
-	printk("Shrink list");
+	printk(KERN_DEBUG"Shrink list");
 	LIST_HEAD(ret_folios);
 	LIST_HEAD(free_folios);
 	LIST_HEAD(demote_folios);
@@ -1966,6 +1966,9 @@ retry:
 					stat->nr_lazyfree_fail += nr_pages;
 				goto activate_locked;
 			}
+			void* test_p = page_address(& folio->page);
+			if(test_p)
+				printk(KERN_NOTICE"vmscan.c, 1968: successfully unmap folio<head page: %x>", (int*)test_p); 
 		}
 
 		/*
@@ -2120,6 +2123,9 @@ free_it:
 		 */
 		nr_reclaimed += nr_pages;
 
+		void* test_pt = page_address(&folio -> page);
+		if(test_pt)
+			printk(KERN_NOTICE"vmscan.c, 2134: Successfully free folio <head page: %x>", (int*)test_pt);
 		/*
 		 * Is there need to periodically free_folio_list? It would
 		 * appear not as the counts should be low
@@ -2578,7 +2584,7 @@ static unsigned long shrink_inactive_list(unsigned long nr_to_scan,
 		struct lruvec *lruvec, struct scan_control *sc,
 		enum lru_list lru)
 {
-	printk("vmscan.c, 2579: Trying to shrink inactive list");
+	printk(KERN_DEBUG"vmscan.c, 2579: Trying to shrink inactive list");
 	LIST_HEAD(folio_list);
 	unsigned long nr_scanned;
 	unsigned int nr_reclaimed = 0;
@@ -2622,6 +2628,7 @@ static unsigned long shrink_inactive_list(unsigned long nr_to_scan,
 		return 0;
 
 	nr_reclaimed = shrink_folio_list(&folio_list, pgdat, sc, &stat, false);
+	printk(KERN_INFO"vmscan.c, 2624: total %d reclaimed", nr_reclaimed);
 
 	spin_lock_irq(&lruvec->lru_lock);
 	move_folios_to_lru(lruvec, &folio_list);
@@ -2700,7 +2707,7 @@ static void shrink_active_list(unsigned long nr_to_scan,
 			       struct scan_control *sc,
 			       enum lru_list lru)
 {
-	printk("vmscan.c, 2701: Trying to shrink active list");
+	printk(KERN_DEBUG"vmscan.c, 2701: Trying to shrink active list");
 	unsigned long nr_taken;
 	unsigned long nr_scanned;
 	unsigned long vm_flags;
@@ -2736,7 +2743,7 @@ static void shrink_active_list(unsigned long nr_to_scan,
 
 		if (unlikely(!folio_evictable(folio))) {
 			folio_putback_lru(folio);
-			printk("vmscan.c, 2737: put back lru, may be unevictable");
+			printk(KERN_DEBUG"vmscan.c, 2737: put back lru, may be unevictable");
 			continue;
 		}
 
@@ -2769,9 +2776,9 @@ static void shrink_active_list(unsigned long nr_to_scan,
 			}
 		}
 
-		void* test_p = kmap(& folio->page);
+		void* test_p = page_address(& folio->page);
 		if(test_p){
-			printk("%x is moved to inactive", (int*)test_p);
+			printk(KERN_INFO"%x is moved to inactive", (int*)test_p);
 		}
 		folio_clear_active(folio);	/* we are de-activating */
 		folio_set_workingset(folio);
@@ -2862,7 +2869,7 @@ unsigned long reclaim_pages(struct list_head *folio_list)
 static unsigned long shrink_list(enum lru_list lru, unsigned long nr_to_scan,
 				 struct lruvec *lruvec, struct scan_control *sc)
 {
-	printk("Trying to shrink lru");
+	printk(KERN_DEBUG"Trying to shrink lru");
 	if (is_active_lru(lru)) {
 		if (sc->may_deactivate & (1 << is_file_lru(lru)))
 			shrink_active_list(nr_to_scan, lruvec, sc, lru);
@@ -6277,14 +6284,14 @@ static void lru_gen_shrink_node(struct pglist_data *pgdat, struct scan_control *
 
 static void shrink_lruvec(struct lruvec *lruvec, struct scan_control *sc)
 {
-	printk("vmscan.c, 6275: Shrink lru vec");
+	printk(KERN_DEBUG"vmscan.c, 6275: Shrink lru vec");
 	unsigned long nr[NR_LRU_LISTS];
 	unsigned long targets[NR_LRU_LISTS];
 	unsigned long nr_to_scan;
 	enum lru_list lru;
 	unsigned long nr_reclaimed = 0;
 	unsigned long nr_to_reclaim = sc->nr_to_reclaim;
-	printk("vmscan.c, 6286: %d needs to be reclaimed", nr_to_reclaim);
+	printk(KERN_DEBUG"vmscan.c, 6286: %d needs to be reclaimed", nr_to_reclaim);
 	bool proportional_reclaim;
 	struct blk_plug plug;
 
@@ -6315,12 +6322,12 @@ static void shrink_lruvec(struct lruvec *lruvec, struct scan_control *sc)
 				sc->priority == DEF_PRIORITY);
 
 	blk_start_plug(&plug);
-	printk("vmscan.c, 6319: instrumentL -> nr[LRU_INACTIVE_ANON] is %d, nr[LRU_ACTIVE_FILE] is %d, nr[LRU_INACTIVE_FILE] is %d", nr[LRU_INACTIVE_ANON], nr[LRU_ACTIVE_FILE], nr[LRU_INACTIVE_FILE]); 
+	printk(KERN_DEBUG"vmscan.c, 6319: instrumentL -> nr[LRU_INACTIVE_ANON] is %d, nr[LRU_ACTIVE_FILE] is %d, nr[LRU_INACTIVE_FILE] is %d", nr[LRU_INACTIVE_ANON], nr[LRU_ACTIVE_FILE], nr[LRU_INACTIVE_FILE]); 
 	while (nr[LRU_INACTIVE_ANON] || nr[LRU_ACTIVE_FILE] ||
 					nr[LRU_INACTIVE_FILE]) {
 		unsigned long nr_anon, nr_file, percentage;
 		unsigned long nr_scanned;
-		printk("vmscan.c: 6316, loop");
+		printk(KERN_DEBUG"vmscan.c: 6316, loop");
 
 		for_each_evictable_lru(lru) {
 			if (nr[lru]) {
@@ -6386,7 +6393,7 @@ static void shrink_lruvec(struct lruvec *lruvec, struct scan_control *sc)
 		nr[lru] = targets[lru] * (100 - percentage) / 100;
 		nr[lru] -= min(nr[lru], nr_scanned);
 	}
-	printk("vmscan.c, 6382: out main loop, nr_reclaimed is %d", nr_reclaimed);
+	printk(KERN_DEBUG"vmscan.c, 6382: out main loop, nr_reclaimed is %d", nr_reclaimed);
 	blk_finish_plug(&plug);
 	sc->nr_reclaimed += nr_reclaimed;
 
@@ -6396,7 +6403,7 @@ static void shrink_lruvec(struct lruvec *lruvec, struct scan_control *sc)
 	 */
 	if (can_age_anon_pages(lruvec_pgdat(lruvec), sc) &&
 	    inactive_is_low(lruvec, LRU_INACTIVE_ANON)){
-		printk("vmscan.c, 6392: go to shrink active");
+		printk(KERN_DEBUG"vmscan.c, 6392: go to shrink active");
 		shrink_active_list(SWAP_CLUSTER_MAX, lruvec,
 				   sc, LRU_ACTIVE_ANON);
 	}
@@ -6532,7 +6539,7 @@ static void shrink_node_memcgs(pg_data_t *pgdat, struct scan_control *sc)
 
 static void shrink_node(pg_data_t *pgdat, struct scan_control *sc)
 {
-	printk("vmscan.c, 6527: trying to shrink node");
+	printk(KERN_DEBUG"vmscan.c, 6527: trying to shrink node");
 	unsigned long nr_reclaimed, nr_scanned, nr_node_reclaimed;
 	struct lruvec *target_lruvec;
 	bool reclaimable = false;
@@ -6716,7 +6723,7 @@ static void consider_reclaim_throttle(pg_data_t *pgdat, struct scan_control *sc)
  */
 static void shrink_zones(struct zonelist *zonelist, struct scan_control *sc)
 {
-	printk("vmscan.c, 6711: trying to shrink zones");
+	printk(KERN_DEBUG"vmscan.c, 6711: trying to shrink zones");
 	struct zoneref *z;
 	struct zone *zone;
 	unsigned long nr_soft_reclaimed;
@@ -6841,7 +6848,7 @@ static void snapshot_refaults(struct mem_cgroup *target_memcg, pg_data_t *pgdat)
 static unsigned long do_try_to_free_pages(struct zonelist *zonelist,
 					  struct scan_control *sc)
 {
-	printk("do try free pages");
+	printk(KERN_DEBUG"do try free pages");
 	int initial_priority = sc->priority;
 	pg_data_t *last_pgdat;
 	struct zoneref *z;
@@ -7178,7 +7185,7 @@ unsigned long try_to_free_mem_cgroup_pages(struct mem_cgroup *memcg,
 	trace_mm_vmscan_memcg_reclaim_end(nr_reclaimed);
 	set_task_reclaim_state(current, NULL);
 
-	printk("vmscan.c, 7179: nr_reclaimed in free mem_cgroup is %d", nr_reclaimed);
+	printk(KERN_DEBUG"vmscan.c, 7179: nr_reclaimed in free mem_cgroup is %d", nr_reclaimed);
 	return nr_reclaimed;
 }
 #endif
