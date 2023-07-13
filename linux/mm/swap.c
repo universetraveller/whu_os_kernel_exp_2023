@@ -500,10 +500,10 @@ void folio_mark_accessed(struct folio *folio)
 		//workingset_activation(folio);
 	}
 	// folio do not allow to shrink idle page, but mark_page_accessed() does not contains this feature
-	/*	
+		
 	if (folio_test_idle(folio))
 		folio_clear_idle(folio);
-	*/	
+		
 }
 EXPORT_SYMBOL(folio_mark_accessed);
 
