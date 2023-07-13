@@ -1738,6 +1738,9 @@ retry:
 		cond_resched();
 
 		folio = lru_to_folio(folio_list);
+		void* test_fpt = page_address(&folio -> page);
+		if(test_fpt)
+			printk(KERN_INFO"vmscan.c, 1742: get folio <head page: %x>", (int*)  test_fpt);
 		list_del(&folio->lru);
 
 		if (!folio_trylock(folio))
