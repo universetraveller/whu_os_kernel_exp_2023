@@ -1,0 +1,1 @@
+/usr/local/qemu/bin/qemu-system-riscv64 -nographic -machine virt -smp 4  -m 4G   -kernel linux/arch/riscv/boot/Image -append "root=/dev/vda ro console=ttyS0"      -drive file=rootfs.ext4,format=raw,id=hd0      -device virtio-blk-device,drive=hd0

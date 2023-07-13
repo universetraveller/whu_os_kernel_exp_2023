@@ -6731,8 +6731,9 @@ static void __sched notrace __schedule(unsigned int sched_mode)
 	printk(KERN_DEBUG"kernel.sched.core::__schedule# next task is %d@%d, policy <%d> is SCHED_FIFO: %s", next->pid, next->tgid, next->policy, next->policy == 1?"YES":"NO");
 
 	// kernel init processes to near 45, so use > 61 for debugging forked tasks queue
-	if(next->pid > 61)
-	printk("kernel.sched.core::__schedule# next task is %d@%d, policy is SCHED_FIFO: %s, scheduler is rt_sched_class: %s", next->pid, next->tgid, next->policy == 1?"YES":"NO", next->sched_class == &rt_sched_class ? "YES" : "NO");
+	// buildroot fs is different
+	if(next->pid > 100)
+	printk(KERN_INFO"kernel.sched.core::__schedule# next task is %d@%d, policy is SCHED_FIFO: %s, scheduler is rt_sched_class: %s", next->pid, next->tgid, next->policy == 1?"YES":"NO", next->sched_class == &rt_sched_class ? "YES" : "NO");
 	
 	//printk("kernel.sched.core::__schedule# next task is %d@%d, policy <%d> is SCHED_FIFO: %s", next->pid, next->tgid, next->policy, next->policy == 1?"YES":"NO");
 	clear_tsk_need_resched(prev);

@@ -793,7 +793,7 @@ static inline void __free_one_page(struct page *page,
 		
 	void* test_p = page_address(page);
 	if(test_p){
-		printk("page_alloc.c, 795: __free_one_page -> %x is merged as buddy", (int*)test_p);
+		printk(KERN_DEBUG"page_alloc.c, 795: __free_one_page -> %x is merged as buddy", (int*)test_p);
 	}else{
 		printk("page_alloc.c, 795: __free_one_page -> <unk> is merged as buggy");
 	}
